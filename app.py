@@ -8,7 +8,7 @@ model = joblib.load('liver_model.pkl')
 scaler = joblib.load('liver_scaler.pkl')
 model_columns = joblib.load('liver_columns.pkl')
 
-st.set_page_config(page_title="Liver Disease Detector", page_icon="🩺", layout="centered")
+st.set_page_config(page_title="Liver Disease Detector", page_icon="🩺", layout="wide")
 
 # ---------- CUSTOM CSS (Teal / Medical Dark Theme) ----------
 st.markdown("""
@@ -31,9 +31,14 @@ html, body, [class*="css"] {
     100% { background-position: 0% 50%; }
 }
 
+section[data-testid="stSidebar"] {
+    background: rgba(6, 35, 43, 0.85);
+    border-right: 1px solid rgba(45, 212, 191, 0.2);
+}
+
 .title-container {
     text-align: center;
-    padding: 25px 0 15px 0;
+    padding: 15px 0 15px 0;
     animation: fadeInDown 1s ease-out;
 }
 
@@ -43,7 +48,7 @@ html, body, [class*="css"] {
 }
 
 .main-title {
-    font-size: 38px;
+    font-size: 30px;
     font-weight: 700;
     background: linear-gradient(90deg, #2dd4bf, #67e8f9);
     -webkit-background-clip: text;
@@ -53,8 +58,17 @@ html, body, [class*="css"] {
 
 .subtitle {
     color: #7fb3ad;
-    font-size: 15px;
+    font-size: 14px;
     margin-bottom: 10px;
+}
+
+.sidebar-label {
+    color: #2dd4bf;
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(45, 212, 191, 0.2);
 }
 
 .glass-card {
@@ -99,7 +113,7 @@ div.stButton > button:hover {
 
 .result-box {
     text-align: center;
-    padding: 28px;
+    padding: 40px;
     border-radius: 18px;
     animation: popIn 0.5s ease-out;
     margin-top: 15px;
@@ -114,7 +128,7 @@ div.stButton > button:hover {
 .result-nodisease { background: rgba(45, 212, 191, 0.12); border: 1px solid rgba(45, 212, 191, 0.4); }
 
 .result-text {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
     color: #f0f4fa;
 }
@@ -123,6 +137,16 @@ div.stButton > button:hover {
     color: #7fb3ad;
     font-size: 14px;
     margin-top: 6px;
+}
+
+.placeholder-box {
+    text-align: center;
+    padding: 60px 30px;
+    border-radius: 18px;
+    background: rgba(20, 60, 60, 0.2);
+    border: 1px dashed rgba(45, 212, 191, 0.3);
+    color: #7fb3ad;
+    font-size: 15px;
 }
 
 label, .stSlider label, .stSelectbox label, .stNumberInput label {
@@ -137,7 +161,25 @@ label, .stSlider label, .stSelectbox label, .stNumberInput label {
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- TITLE ----------
+# ---------- SIDEBAR (INPUT PANEL) ----------
+with st.sidebar:
+    st.markdown('<div class="sidebar-label">🩺 Patient Details</div>', unsafe_allow_html=True)
+
+    age = st.slider("Age", 4, 90, 40)
+    gender = st.selectbox("Gender", ["Male", "Female"])
+    total_bilirubin = st.number_input("Total Bilirubin (mg/dL)", 0.1, 75.0, 1.0, step=0.1)
+    direct_bilirubin = st.number_input("Direct Bilirubin (mg/dL)", 0.1, 20.0, 0.3, step=0.1)
+    alkaline_phosphotase = st.number_input("Alkaline Phosphotase (IU/L)", 60, 2200, 200)
+    alamine_aminotransferase = st.number_input("ALT / Alamine Aminotransferase (IU/L)", 10, 2000, 30)
+    aspartate_aminotransferase = st.number_input("AST / Aspartate Aminotransferase (IU/L)", 10, 5000, 35)
+    total_proteins = st.number_input("Total Proteins (g/dL)", 2.0, 10.0, 6.8, step=0.1)
+    albumin = st.number_input("Albumin (g/dL)", 0.5, 6.0, 3.3, step=0.1)
+    ag_ratio = st.number_input("Albumin and Globulin Ratio", 0.1, 3.0, 1.0, step=0.1)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    predict_btn = st.button("Analyze Liver Health")
+
+# ---------- MAIN AREA ----------
 st.markdown("""
 <div class="title-container">
     <div class="main-title">🩺 Liver Disease Detector</div>
@@ -145,26 +187,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ---------- INPUT CARD ----------
-st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-st.markdown('<div class="section-label">Patient Details</div>', unsafe_allow_html=True)
-
-age = st.slider("Age", 4, 90, 40)
-gender = st.selectbox("Gender", ["Male", "Female"])
-total_bilirubin = st.number_input("Total Bilirubin (mg/dL)", 0.1, 75.0, 1.0, step=0.1)
-direct_bilirubin = st.number_input("Direct Bilirubin (mg/dL)", 0.1, 20.0, 0.3, step=0.1)
-alkaline_phosphotase = st.number_input("Alkaline Phosphotase (IU/L)", 60, 2200, 200)
-alamine_aminotransferase = st.number_input("ALT / Alamine Aminotransferase (IU/L)", 10, 2000, 30)
-aspartate_aminotransferase = st.number_input("AST / Aspartate Aminotransferase (IU/L)", 10, 5000, 35)
-total_proteins = st.number_input("Total Proteins (g/dL)", 2.0, 10.0, 6.8, step=0.1)
-albumin = st.number_input("Albumin (g/dL)", 0.5, 6.0, 3.3, step=0.1)
-ag_ratio = st.number_input("Albumin and Globulin Ratio", 0.1, 3.0, 1.0, step=0.1)
-
-st.markdown("<br>", unsafe_allow_html=True)
-predict_btn = st.button("Analyze Liver Health")
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------- PREDICTION ----------
 if predict_btn:
     with st.spinner("Analyzing blood test values..."):
         time.sleep(0.8)
@@ -214,3 +236,9 @@ if predict_btn:
         st.success("Your liver markers appear within a typical range. Regular checkups are still recommended for ongoing health monitoring.")
 
     st.caption("Disclaimer: This tool is for educational purposes only and does not substitute professional medical advice.")
+else:
+    st.markdown("""
+    <div class="placeholder-box">
+        Enter patient details in the sidebar and click <b>"Analyze Liver Health"</b> to see the prediction.
+    </div>
+    """, unsafe_allow_html=True)
