@@ -4,6 +4,7 @@ An AI-powered web application that predicts the likelihood of liver disease base
 
 🔗 **Live App:** https://bcy6ujtqm7da5g5vv8tnnp.streamlit.app/
 
+ "Note: This app is hosted on Streamlit Community Cloud's free tier. If the app appears inactive, please click 'Yes, get this app back up!' — it will load within a minute."
 ---
 
 ## What This Project Does
